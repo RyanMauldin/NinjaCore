@@ -21,9 +21,9 @@ namespace NinjaCore.Extensions.Models
 
         public void Clear()
         {
-            Password = Password.TryClear(clearAfterUse: true);
-            Salt = Salt.TryClear(clearAfterUse: true);
-            InitialVector = InitialVector.TryClear(clearAfterUse: true);
+            Password.TryClear(clearAfterUse: true);
+            Salt.TryClear(clearAfterUse: true);
+            InitialVector.TryClear(clearAfterUse: true);
             PasswordIterations = 0;
             KeySize = 0;
         }
