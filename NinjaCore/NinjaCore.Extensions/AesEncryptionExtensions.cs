@@ -87,7 +87,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
@@ -144,7 +144,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
@@ -204,7 +204,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
@@ -264,7 +264,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
@@ -321,7 +321,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
@@ -378,7 +378,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
@@ -439,7 +439,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
@@ -499,7 +499,7 @@ namespace NinjaCore.Extensions
 
                 try
                 {
-                    passwordBytes = credentials.Password.ToByteArray(Encoding.UTF8, clearOnException: true, clearAfterUse: true);
+                    passwordBytes = credentials.Password.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     saltBytes = credentials.Salt.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     initialVectorBytes = credentials.InitialVector.ToByteArray(Encoding.ASCII, clearOnException: true, clearAfterUse: true);
                     var passwordIterations = credentials.PasswordIterations;
