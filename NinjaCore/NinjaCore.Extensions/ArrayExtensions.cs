@@ -226,27 +226,32 @@ namespace NinjaCore.Extensions
                         nameof(array), "Unable to validate the array value successfully.");
 
                 // If the array has not been initialized or contains no elements than exit the function.
+                if (encoding == null) encoding = DefaultEncoding;
                 if (array == null) return null;
-                byteResults = new byte[0];
-                if (!array.Any()) return byteResults;
-
-                if (index > 0)
-                {
-                    // Rebase array before resize.
-                    for (var i = 0; i < intendedLength; i++)
-                        array[i] = array[i + index];
-                }
-
-                // Attempt array resize.
-                if (array.Length != intendedLength)
-                    Array.Resize(ref array, intendedLength);
+                if (!array.Any()) return new byte[0];
 
                 // Convert the array values and return the results.
-                if (encoding == null)
-                    encoding = DefaultEncoding;
-                charResults = encoding.ToCharacterArray(array);
-                byteResults = encoding.ToByteArray(charResults);
-                return byteResults;
+                switch (array)
+                {
+                    case byte[] bytes:
+                    {
+                        byteResults = bytes;
+                        if (!byteResults.Any()) return new byte[0];
+                        charResults = encoding.GetChars(byteResults, index, intendedLength);
+                        if (!charResults.Any()) return new byte[0];
+                        byteResults = encoding.GetBytes(charResults);
+                        return byteResults.Any() ? byteResults : new byte[0];
+                    }
+                    case char[] chars:
+                    {
+                        charResults = chars;
+                        if (!charResults.Any()) return new byte[0];
+                        byteResults = encoding.GetBytes(charResults, index, intendedLength);
+                        return byteResults.Any() ? byteResults : new byte[0];
+                    }
+                    default:
+                        return null;
+                }
             }
             catch (Exception e)
             {
@@ -303,8 +308,8 @@ namespace NinjaCore.Extensions
             bool clearOnException = false, bool clearAfterUse = false)
         {
             const bool rethrowOnException = true;
-            byte[] byteResults = null;
             char[] charResults = null;
+            byte[] byteResults = null;
             var exceptionThrown = false;
 
             try
@@ -315,27 +320,32 @@ namespace NinjaCore.Extensions
                     nameof(array), "Unable to validate the array value successfully.");
 
                 // If the array has not been initialized or contains no elements than exit the function.
+                if (encoding == null) encoding = DefaultEncoding;
                 if (array == null) return null;
-                charResults = new char[0];
-                if (!array.Any()) return charResults;
-
-                if (index > 0)
-                {
-                    // Rebase array before resize.
-                    for (var i = 0; i < intendedLength; i++)
-                        array[i] = array[i + index];
-                }
-
-                // Attempt array resize.
-                if (array.Length != intendedLength)
-                    Array.Resize(ref array, intendedLength);
+                if (!array.Any()) return new char[0];
 
                 // Convert the array values and return the results.
-                if (encoding == null)
-                    encoding = DefaultEncoding;
-                byteResults = encoding.ToByteArray(array);
-                charResults = encoding.ToCharacterArray(byteResults);
-                return charResults;
+                switch (array)
+                {
+                    case byte[] bytes:
+                    {
+                        byteResults = bytes;
+                        if (!byteResults.Any()) return new char[0];
+                        charResults = encoding.GetChars(byteResults, index, intendedLength);
+                        return charResults.Any() ? charResults : new char[0];
+                    }
+                    case char[] chars:
+                    {
+                        charResults = chars;
+                        if (!charResults.Any()) return new char[0];
+                        byteResults = encoding.GetBytes(charResults, index, intendedLength);
+                        if (!byteResults.Any()) return new char[0];
+                        charResults = encoding.GetChars(byteResults);
+                        return charResults.Any() ? charResults : new char[0];
+                    }
+                    default:
+                        return null;
+                }
             }
             catch (Exception e)
             {
@@ -363,37 +373,73 @@ namespace NinjaCore.Extensions
         }
 
         /// <summary>
-        /// 
+        /// Converts array using the custom encoding value of <paramref name="encoding"/>.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="encoding"></param>
+        /// <remarks>
+        /// If <paramref name="encoding"/> is null the default encoding <seealso cref="DefaultEncoding"/> is used
+        /// which is currently set to Encoding.UTF8.
+        /// </remarks>
         /// <param name="array"></param>
-        /// <param name="index"></param>
-        /// <param name="length"></param>
-        /// <param name="clearOnException"></param>
-        /// <param name="clearAfterUse"></param>
-        /// <returns></returns>
+        /// <param name="encoding">The custom encoding to convert to.</param>
+        /// <param name="index">The index location where the clear array command will begin.</param>
+        /// <param name="length">
+        /// The length of elements to clear for <paramref name="array"/> parameter, starting at the value of the
+        /// <paramref name="index"/> parameter location. If the <paramref name="length"/> is set to 0, the value
+        /// will be automatically calculated to the end of the array.
+        /// </param>
+        /// <param name="clearOnException">
+        /// For security aware applications, the <paramref name="clearOnException"/> parameter should be set to true.
+        /// The <paramref name="clearOnException"/> setting activates code when exceptions are thrown that clears the
+        /// values of all internal scoped array values including the <paramref name="array"/> parameter values. When
+        /// the values of all arrays are cleared, the exception is rethrown.
+        /// </param>
+        /// <param name="clearAfterUse">
+        /// For security aware applications, the <paramref name="clearAfterUse"/> parameter should be set to true
+        /// when the data being operated on is no longer needed after the call to this method.
+        /// </param>
+        /// <returns>An array of converted and encoded values.</returns>
         public static byte[] ToByteArray<T>(this Encoding encoding, T[] array, int index = 0, int length = 0,
             bool clearOnException = false, bool clearAfterUse = false)
         {
+            const bool rethrowOnException = true;
             byte[] byteResults = null;
             char[] charResults = null;
             var exceptionThrown = false;
 
             try
             {
-                if (encoding == null) throw new ArgumentNullException(nameof(encoding));
+                // If the array has valid bounds, clear the array using the index and intended length.
+                if (!array.TryValidateArrayBounds(out var intendedLength, index, length, clearOnException,
+                    rethrowOnException, clearAfterUse)) throw new ArgumentOutOfRangeException(
+                    nameof(array), "Unable to validate the array value successfully.");
+
+                // If the array has not been initialized or contains no elements than exit the function.
+                if (encoding == null) encoding = DefaultEncoding;
                 if (array == null) return null;
                 if (!array.Any()) return new byte[0];
-                if (array is byte[])
-                {
-                    byteResults = array as byte[];
-                    return byteResults;
-                }
 
-                charResults = array as char[];
-                if (array is char[]) return charResults.Any() ? encoding.GetBytes(charResults) : new byte[0];
-                return null;
+                // Convert the array values and return the results.
+                switch (array)
+                {
+                    case byte[] bytes:
+                    {
+                        byteResults = bytes;
+                        if (!byteResults.Any()) return new byte[0];
+                        charResults = encoding.GetChars(byteResults, index, intendedLength);
+                        if (!charResults.Any()) return new byte[0];
+                        byteResults = encoding.GetBytes(charResults);
+                        return byteResults.Any() ? byteResults : new byte[0];
+                    }
+                    case char[] chars:
+                    {
+                        charResults = chars;
+                        if (!charResults.Any()) return new byte[0];
+                        byteResults = encoding.GetBytes(charResults, index, intendedLength);
+                        return byteResults.Any() ? byteResults : new byte[0];
+                    }
+                    default:
+                        return null;
+                }
             }
             catch (Exception e)
             {
@@ -419,17 +465,100 @@ namespace NinjaCore.Extensions
                     if (charResults != null && charResults.Any()) Array.Clear(charResults, 0, charResults.Length);
                 }
             }
-            
         }
 
-        public static char[] ToCharacterArray<T>(this Encoding encoding, T[] array)
+        /// <summary>
+        /// Converts array using the custom encoding value of <paramref name="encoding"/>.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="encoding"/> is null the default encoding <seealso cref="DefaultEncoding"/> is used
+        /// which is currently set to Encoding.UTF8.
+        /// </remarks>
+        /// <param name="array"></param>
+        /// <param name="encoding">The custom encoding to convert to.</param>
+        /// <param name="index">The index location where the clear array command will begin.</param>
+        /// <param name="length">
+        /// The length of elements to clear for <paramref name="array"/> parameter, starting at the value of the
+        /// <paramref name="index"/> parameter location. If the <paramref name="length"/> is set to 0, the value
+        /// will be automatically calculated to the end of the array.
+        /// </param>
+        /// <param name="clearOnException">
+        /// For security aware applications, the <paramref name="clearOnException"/> parameter should be set to true.
+        /// The <paramref name="clearOnException"/> setting activates code when exceptions are thrown that clears the
+        /// values of all internal scoped array values including the <paramref name="array"/> parameter values. When
+        /// the values of all arrays are cleared, the exception is rethrown.
+        /// </param>
+        /// <param name="clearAfterUse">
+        /// For security aware applications, the <paramref name="clearAfterUse"/> parameter should be set to true
+        /// when the data being operated on is no longer needed after the call to this method.
+        /// </param>
+        /// <returns>An array of converted and encoded values.</returns>
+        public static char[] ToCharacterArray<T>(this Encoding encoding, T[] array, int index = 0, int length = 0,
+            bool clearOnException = false, bool clearAfterUse = false)
         {
-            if (encoding == null) throw new ArgumentNullException(nameof(encoding));
-            if (array == null) return null;
-            if (!array.Any()) return new char[0];
-            if (array is char[] charResults) return charResults;
-            if (!(array is byte[] byteResults)) return null;
-            return byteResults.Any() ? encoding.GetChars(byteResults) : new char[0];
+            const bool rethrowOnException = true;
+            char[] charResults = null;
+            byte[] byteResults = null;
+            var exceptionThrown = false;
+
+            try
+            {
+                // If the array has valid bounds, clear the array using the index and intended length.
+                if (!array.TryValidateArrayBounds(out var intendedLength, index, length, clearOnException,
+                    rethrowOnException, clearAfterUse)) throw new ArgumentOutOfRangeException(
+                    nameof(array), "Unable to validate the array value successfully.");
+
+                // If the array has not been initialized or contains no elements than exit the function.
+                if (encoding == null) encoding = DefaultEncoding;
+                if (array == null) return null;
+                if (!array.Any()) return new char[0];
+
+                // Convert the array values and return the results.
+                switch (array)
+                {
+                    case byte[] bytes:
+                    {
+                        byteResults = bytes;
+                        if (!byteResults.Any()) return new char[0];
+                        charResults = encoding.GetChars(byteResults, index, intendedLength);
+                        return charResults.Any() ? charResults : new char[0];
+                    }
+                    case char[] chars:
+                    {
+                        charResults = chars;
+                        if (!charResults.Any()) return new char[0];
+                        byteResults = encoding.GetBytes(charResults, index, intendedLength);
+                        if (!byteResults.Any()) return new char[0];
+                        charResults = encoding.GetChars(byteResults);
+                        return charResults.Any() ? charResults : new char[0];
+                    }
+                    default:
+                        return null;
+                }
+            }
+            catch (Exception e)
+            {
+                exceptionThrown = true;
+                if (!clearOnException) throw;
+
+                // Clear array contents.
+                if (array != null && array.Any()) Array.Clear(array, 0, array.Length);
+                if (charResults != null && charResults.Any()) Array.Clear(charResults, 0, charResults.Length);
+                if (byteResults != null && byteResults.Any()) Array.Clear(byteResults, 0, byteResults.Length);
+                // TODO: may want to throw a new exception here in case the existing exception has critical or
+                // TODO: security sensitive data which has the potential of hitting logs.
+                throw; // TODO: Evaluate options.
+            }
+            finally
+            {
+                // Clear array contents after return value has been copied to calling code.
+                if (clearAfterUse && !(exceptionThrown && clearOnException))
+                {
+                    if (array != null && array.Any()) Array.Clear(array, 0, array.Length);
+                    if (charResults != null && charResults.Any()) Array.Clear(charResults, 0, charResults.Length);
+                    if (byteResults != null && byteResults.Any()) Array.Clear(byteResults, 0, byteResults.Length);
+                }
+            }
         }
     }
 }
