@@ -41,16 +41,16 @@ namespace NinjaCore.Extensions
             try
             {
                 // If the array has valid bounds than process list.
-                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
-                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
-                    throw boundsValidationResult.ToException(nameof(array));
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
+                    throw bounds.ToException();
 
                 // Do basic validation check and return early if there is no values to process.
                 if (array == null) return null;
                 if (!array.Any()) return new byte[0];
 
                 // Convert the array values and return the results.
-                charResults = encoding.GetChars(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                charResults = encoding.GetChars(array, bounds.IntendedSkip, bounds.IntendedTake);
                 if (!charResults.Any()) return new byte[0];
                 var byteResults = encoding.GetBytes(charResults);
                 return byteResults.Any() ? byteResults : new byte[0];
@@ -103,16 +103,16 @@ namespace NinjaCore.Extensions
             try
             {
                 // If the array has valid bounds than process list.
-                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
-                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
-                    throw boundsValidationResult.ToException(nameof(array));
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
+                    throw bounds.ToException();
 
                 // Do basic validation check and return early if there is no values to process.
                 if (array == null) return null;
                 if (!array.Any()) return new byte[0];
 
                 // Convert the array values and return the results.
-                var byteResults = encoding.GetBytes(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                var byteResults = encoding.GetBytes(array, bounds.IntendedSkip, bounds.IntendedTake);
                 return byteResults.Any() ? byteResults : new byte[0];
             }
             catch (Exception)
@@ -159,9 +159,9 @@ namespace NinjaCore.Extensions
             try
             {
                 // If the array has valid bounds than process list.
-                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
-                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
-                    throw boundsValidationResult.ToException(nameof(array));
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
+                    throw bounds.ToException();
 
                 // If the array has not been initialized or contains no elements than exit the function.
                 if (encoding == null)
@@ -171,7 +171,7 @@ namespace NinjaCore.Extensions
                 if (array == null) return null;
                 if (!array.Any()) return new char[0];
 
-                var charResults = encoding.GetChars(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                var charResults = encoding.GetChars(array, bounds.IntendedSkip, bounds.IntendedTake);
                 return charResults.Any() ? charResults : new char[0];
             }
             catch (Exception)
@@ -219,20 +219,15 @@ namespace NinjaCore.Extensions
             try
             {
                 // If the array has valid bounds than process list.
-                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
-                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
-                    throw boundsValidationResult.ToException(nameof(array));
-
-                // If the array has not been initialized or contains no elements than exit the function.
-                if (encoding == null)
-                    encoding = NinjaCoreSettings.DefaultEncoding;
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
+                    throw bounds.ToException();
 
                 // Do basic validation check and return early if there is no values to process.
                 if (array == null) return null;
                 if (!array.Any()) return new char[0];
 
-                
-                byteResults = encoding.GetBytes(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                byteResults = encoding.GetBytes(array, bounds.IntendedSkip, bounds.IntendedTake);
                 if (!byteResults.Any()) return new char[0];
                 var charResults = encoding.GetChars(byteResults);
                 return charResults.Any() ? charResults : new char[0];
@@ -286,41 +281,39 @@ namespace NinjaCore.Extensions
             try
             {
                 // If the array has valid bounds than process list.
-                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
-                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
-                    throw boundsValidationResult.ToException(nameof(array));
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
+                    throw bounds.ToException();
 
                 // Do basic validation check and return early if there is no values to process.
-                if (array == null || !array.Any()) return true;
+                if (array == null) return true;
+                if (array.IsReadOnly) return false;
+                if (!array.Any()) return true;
 
                 // Clear the array based on the user array bounds and return the array.
+                var arrayLength = array.Length;
+                var intendedSkip = bounds.IntendedSkip;
+                var intendedTake = bounds.IntendedTake;
+                var intendedRange = intendedSkip + intendedTake;
                 switch (boundsMode)
                 {
-                    case BoundsMode.Array:
-                        if (!array.IsReadOnly)
-                        {
-                            Array.Clear(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
-                            return true;
-                        }
-                        break;
-                    case BoundsMode.PassThrough:
-                        if (!array.IsReadOnly)
-                        {
-                            Array.Clear(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
-                            return true;
-                        }
-                        break;
-                    default:
-                        if (!array.IsReadOnly && boundsValidationResult.IntendedSkip < array.Length)
-                        {
-                            if (boundsValidationResult.IntendedSkip + boundsValidationResult.IntendedTake <= array.Length)
-                                Array.Clear(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
-                            else
-                                Array.Clear(array, boundsValidationResult.IntendedSkip, array.Length - Math.Max(boundsValidationResult.IntendedSkip, 0));
+                    case BoundsMode.Ninja:
+                    case BoundsMode.List:
+                        if (intendedSkip >= arrayLength) return true;
 
+                        if (intendedRange <= arrayLength)
+                        {
+                            Array.Clear(array, intendedSkip, intendedTake);
                             return true;
                         }
-                        break;
+
+                        intendedRange = arrayLength - Math.Max(intendedSkip, 0);
+                        Array.Clear(array, intendedSkip, intendedRange);
+                        return true;
+                    case BoundsMode.Array:
+                    case BoundsMode.PassThrough:
+                        Array.Clear(array, bounds.IntendedSkip, bounds.IntendedTake);
+                        return true;
                 }
 
                 return false;
@@ -343,7 +336,7 @@ namespace NinjaCore.Extensions
 
         /// <summary>
         /// Validates the specified array is valid for use with the <paramref name="skip"/> and
-        /// <paramref name="take"/> parameters if provided, and provides back the <seealso cref="BoundsValidationResult"/>
+        /// <paramref name="take"/> parameters if provided, and provides back the <seealso cref="Bounds"/>
         /// summary of validity, error messages, and intended measurements. 
         /// </summary>
         /// <param name="array">The array to operate on.</param>
@@ -358,8 +351,8 @@ namespace NinjaCore.Extensions
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
         /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
-        /// <returns>The <seealso cref="BoundsValidationResult"/> parameter.</returns>
-        public static BoundsValidationResult TryValidateBounds<T>(this T[] array, int? skip = null, int? take = null,
+        /// <returns>The <seealso cref="Bounds"/> parameter.</returns>
+        public static Bounds TryValidateBounds<T>(this T[] array, int? skip = null, int? take = null,
             BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
         {
             var exceptionThrown = false;
@@ -384,7 +377,7 @@ namespace NinjaCore.Extensions
                             // If skip only has a default value.
                             if (!intendedSkip.HasValue) intendedSkip = 0;
                             // Negative skip value is not allowed in array mode.
-                            else if (intendedSkip < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                            else if (intendedSkip < 0) invalidBounds.Add(new InvalidBounds(nameof(skip),
                                 $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
                             // Skip value is too large for array mode with length of zero.
                             else if (intendedSkip > 0) invalidBounds.Add(new InvalidBounds(nameof(skip),
@@ -404,7 +397,7 @@ namespace NinjaCore.Extensions
                             // If skip only has a default value.
                             if (!intendedSkip.HasValue) intendedSkip = 0;
                             // Negative skip values are not allowed in list mode.
-                            else if (intendedSkip < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                            else if (intendedSkip < 0) invalidBounds.Add(new InvalidBounds(nameof(skip),
                                 $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
                             // Skip can be greater than or equal to the list length in list mode.
 
@@ -415,8 +408,7 @@ namespace NinjaCore.Extensions
                                 $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
                             // Take can be greater than or equal to the list length in list mode.
                             break;
-                        // case BoundsMode.PassThrough:
-                        default:
+                        case BoundsMode.PassThrough:
                             intendedSkip ??= 0;
                             intendedTake ??= 0;
                             break;
@@ -478,7 +470,7 @@ namespace NinjaCore.Extensions
                             else if (intendedSkip.Value < 0)
                             {
                                 // Negative skip values are not allowed in array mode.
-                                invalidBounds.Add(new InvalidBounds(nameof(take),
+                                invalidBounds.Add(new InvalidBounds(nameof(skip),
                                     $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
                                 // If take only has a default value.
                                 if (!intendedTake.HasValue) intendedTake = arrayLength;
@@ -534,7 +526,7 @@ namespace NinjaCore.Extensions
                             else if (intendedSkip.Value < 0)
                             {
                                 // Negative skip values are not allowed in array mode.
-                                invalidBounds.Add(new InvalidBounds(nameof(take),
+                                invalidBounds.Add(new InvalidBounds(nameof(skip),
                                     $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
                                 // If take only has a default value.
                                 if (!intendedTake.HasValue) intendedTake = arrayLength;
@@ -545,19 +537,19 @@ namespace NinjaCore.Extensions
                                     $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
                             }
                             break;
-                        // case BoundsMode.PassThrough:
-                        default:
+                        case BoundsMode.PassThrough:
                             intendedSkip ??= 0;
-                            intendedTake ??= 0;
+                            intendedTake ??= arrayLength;
                             break;
                     }
                 }
 
                 // Make sure take has a value.
+                intendedSkip ??= 0;
                 intendedTake ??= 0;
 
                 // The list bounds are valid and return the list.
-                return new BoundsValidationResult(intendedSkip.Value, intendedTake.Value, invalidBounds);
+                return new Bounds(nameof(array), intendedSkip.Value, intendedTake.Value, invalidBounds);
             }
             catch (Exception)
             {
