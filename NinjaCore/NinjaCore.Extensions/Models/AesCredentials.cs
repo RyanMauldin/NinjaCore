@@ -2,7 +2,7 @@
 
 namespace NinjaCore.Extensions.Models
 {
-    public class AesEncryptionCredentials : IDisposable
+    public class AesCredentials : IDisposable
     {
         public byte[] Password { get; set; }
 

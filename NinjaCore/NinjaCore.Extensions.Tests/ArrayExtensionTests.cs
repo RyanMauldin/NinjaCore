@@ -25,11 +25,11 @@ namespace NinjaCore.Extensions.Tests
             fullClearBytes.Should().BeOfType<byte[]>();
             fullClearBytes.Should().NotBeNullOrEmpty();
 
-            var isValid = valueBytes.TryClear(index: 6, length: 2);
+            var isValid = valueBytes.TryClear(skip: 6, take: 2);
             valueBytes.Should().BeEquivalentTo(partialClearBytes);
             isValid.Should().BeTrue();
 
-            isValid = valueBytes.TryClear(index: 6, length: 2, clearAfterUse: true);
+            isValid = valueBytes.TryClear(skip: 6, take: 2, clearAfterUse: true);
             valueBytes.Should().BeEquivalentTo(fullClearBytes);
             isValid.Should().BeTrue();
         }
@@ -50,15 +50,15 @@ namespace NinjaCore.Extensions.Tests
             fullClearBytes.Should().BeOfType<byte[]>();
             fullClearBytes.Should().NotBeNullOrEmpty();
 
-            var isValid = valueBytes.TryValidateArrayBounds(out var intendedLength, index: 6, length: 2);
+            var boundsValidationResult = valueBytes.TryValidateBounds(skip: 6, take: 2);
             valueBytes.Should().BeEquivalentTo(partialValidateBytes);
-            isValid.Should().BeTrue();
-            intendedLength.Should().Be(2);
+            boundsValidationResult.IsValid.Should().BeTrue();
+            boundsValidationResult.IntendedTake.Should().Be(2);
 
-            isValid = valueBytes.TryValidateArrayBounds(out intendedLength, index: 6, length: 2, clearAfterUse: true);
+            boundsValidationResult = valueBytes.TryValidateBounds(skip: 6, take: 2, clearAfterUse: true);
+            boundsValidationResult.IsValid.Should().BeTrue();
+            boundsValidationResult.IntendedTake.Should().Be(2);
             valueBytes.Should().BeEquivalentTo(fullClearBytes);
-            isValid.Should().BeTrue();
-            intendedLength.Should().Be(2);
         }
 
         [Fact]
@@ -73,19 +73,20 @@ namespace NinjaCore.Extensions.Tests
             partialValidateBytes.Should().BeOfType<byte[]>();
             partialValidateBytes.Should().NotBeNullOrEmpty();
 
-            var fullClearBytes = Encoding.UTF8.GetBytes("\0\0");
+            var fullClearBytes = Encoding.UTF8.GetBytes("\0\0\0\0\0\0\0\0\0\0");
             fullClearBytes.Should().BeOfType<byte[]>();
             fullClearBytes.Should().NotBeNullOrEmpty();
 
-            var byteArrayResult = valueBytes.ToByteArray(index: 6, length: 2);
+            var byteArrayResult = valueBytes.ToByteArray(skip: 6, take: 2);
             byteArrayResult.Should().BeOfType<byte[]>();
             byteArrayResult.Should().NotBeNullOrEmpty();
             byteArrayResult.Should().BeEquivalentTo(partialValidateBytes);
 
-            byteArrayResult = valueBytes.ToByteArray(index: 6, length: 2, clearAfterUse: true);
+            byteArrayResult = valueBytes.ToByteArray(skip: 6, take: 2, clearAfterUse: true);
             byteArrayResult.Should().BeOfType<byte[]>();
             byteArrayResult.Should().NotBeNullOrEmpty();
-            byteArrayResult.Should().BeEquivalentTo(fullClearBytes);
+            byteArrayResult.Should().BeEquivalentTo(partialValidateBytes);
+            valueBytes.Should().BeEquivalentTo(fullClearBytes);
         }
 
         [Fact]
@@ -103,22 +104,23 @@ namespace NinjaCore.Extensions.Tests
             partialValidateChars.Should().BeOfType<char[]>();
             partialValidateChars.Should().NotBeNullOrEmpty();
 
-            var fullClearBytes = Encoding.UTF8.GetBytes("\0\0");
+            var fullClearBytes = Encoding.UTF8.GetBytes("\0\0\0\0\0\0\0\0\0\0");
             var fullClearChars = Encoding.UTF8.GetChars(fullClearBytes);
             fullClearBytes.Should().BeOfType<byte[]>();
             fullClearBytes.Should().NotBeNullOrEmpty();
             fullClearChars.Should().BeOfType<char[]>();
             fullClearChars.Should().NotBeNullOrEmpty();
 
-            var charArrayResult = valueBytes.ToCharacterArray(index: 6, length: 2);
+            var charArrayResult = valueBytes.ToCharacterArray(skip: 6, take: 2);
             charArrayResult.Should().BeOfType<char[]>();
             charArrayResult.Should().NotBeNullOrEmpty();
             charArrayResult.Should().BeEquivalentTo(partialValidateChars);
 
-            charArrayResult = valueBytes.ToCharacterArray(index: 6, length: 2, clearAfterUse: true);
+            charArrayResult = valueBytes.ToCharacterArray(skip: 6, take: 2, clearAfterUse: true);
             charArrayResult.Should().BeOfType<char[]>();
             charArrayResult.Should().NotBeNullOrEmpty();
-            charArrayResult.Should().BeEquivalentTo(fullClearChars);
+            charArrayResult.Should().BeEquivalentTo(partialValidateChars);
+            valueBytes.Should().BeEquivalentTo(fullClearChars);
         }
     }
 }

@@ -1,374 +1,577 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NinjaCore.Extensions.Models;
+using NinjaCore.Extensions.Types;
 
 namespace NinjaCore.Extensions
 {
     /// <summary>
     /// Array extensions methods to make code cleaner where feasible in regards to a security conscious mindset.
-    /// There are numerous flags to enhance performance in regards to using these calls multiple ways.
     /// </summary>
     public static class ArrayExtensions
     {
-        public static readonly Encoding DefaultEncoding = Encoding.UTF8;
-
-        /// <summary>
-        /// Clears specified array values by setting all of the array values to the default value of
-        /// <typeparamref name="T"/> parameter for use with the current <paramref name="index"/> and
-        /// <paramref name="length"/> values and uses intended length difference based on the values set for
-        /// <paramref name="index"/> and <paramref name="length"/> parameters.
-        /// </summary>
-        /// <remarks>
-        /// Passing in the value zero for the <paramref name="length"/> parameter defaults the length to be the
-        /// same length as the <paramref name="array"/> parameter with the <paramref name="index"/> subtracted
-        /// difference. When the <paramref name="clearOnException"/> parameter is set to true, any exceptions
-        /// being thrown are caught internally, and the <paramref name="array"/> parameter values are cleared
-        /// to default values for the entire array, not just the considerations of the <paramref name="index"/>
-        /// and <paramref name="length"/> parameters. After the arrays are cleared any caught exception is
-        /// rethrown. Also, the <paramref name="clearAfterUse"/> parameter has the goal to clear all array
-        /// values in the finally block. Setting <paramref name="rethrowOnException"/> parameter to false allows
-        /// this method to operate as a simple try action, however one that gives more control of usage by
-        /// also allowing exceptions to bubble up if <paramref name="rethrowOnException"/> is set to true.
-        /// </remarks>
-        /// <typeparam name="T">The generic type parameter.</typeparam>
-        /// <param name="array">The array to clear.</param>
-        /// <param name="index">The index location where the clear array command will begin.</param>
-        /// <param name="length">
-        /// The length of elements to clear for <paramref name="array"/> parameter, starting at the value of the
-        /// <paramref name="index"/> parameter location. If the <paramref name="length"/> is set to 0, the value
-        /// will be automatically calculated to the end of the array.
-        /// </param>
-        /// <param name="clearOnException">
-        /// For security aware applications, the <paramref name="clearOnException"/> parameter should be set to true.
-        /// The <paramref name="clearOnException"/> setting activates code when exceptions are thrown that clears the
-        /// values of all internal scoped array values including the <paramref name="array"/> parameter values. When
-        /// the values of all arrays are cleared, the exception is rethrown.
-        /// </param>
-        /// <param name="rethrowOnException">
-        /// After any internal exceptions are caught and array values cleared, the exception is rethrown unless
-        /// <paramref name="rethrowOnException"/> value is set to false.
-        /// </param>
-        /// <param name="clearAfterUse">
-        /// For security aware applications, the <paramref name="clearAfterUse"/> parameter should be set to true
-        /// when the data being operated on is no longer needed after the call to this method.
-        /// </param>
-        /// <returns>The <paramref name="array"/> parameter instance to allow for method chaining.</returns>
-        public static bool TryClear<T>(this T[] array, int index = 0, int length = 0, bool clearOnException = false,
-            bool rethrowOnException = false, bool clearAfterUse = false)
-        {
-            try
-            {
-                // If the array has valid bounds, clear the array using the index and intended length.
-                if (!array.TryValidateArrayBounds(out var intendedLength, index, length, clearOnException,
-                    rethrowOnException, clearAfterUse)) throw new ArgumentOutOfRangeException(
-                        nameof(array), "Unable to validate the array value successfully.");
-
-                // If the array has not been initialized or contains no elements than exit the function.
-                if (array == null || !array.Any()) return true;
-
-                // Clear the array based on the user array bounds and return the array. 
-                Array.Clear(array, index, intendedLength);
-                return true;
-            }
-            catch (Exception e)
-            {
-                // Clear array contents.
-                if (clearOnException && array != null && array.Any()) Array.Clear(array, 0, array.Length);
-                // TODO: may want to throw a new exception here in case the existing exception has critical or
-                // TODO: security sensitive data which has the potential of hitting logs.
-                if (rethrowOnException) throw; // TODO: Evaluate options.
-                return false;
-            }
-            finally
-            {
-                // Clear array contents after return value has been copied to calling code.
-                if (clearAfterUse && array != null && array.Any()) Array.Clear(array, 0, array.Length);
-            }
-        }
-
-        /// <summary>
-        /// Validates the specified array is valid for use with the current <paramref name="index"/> and
-        /// <paramref name="length"/> values and provides back the intended length difference using the
-        /// <paramref name="intendedLength"/> parameter based on the values set for <paramref name="index"/> and
-        /// <paramref name="length"/> parameters.
-        /// </summary>
-        /// <remarks>
-        /// This method facilitates chaining and fluent syntax. Passing in the value zero for the
-        /// <paramref name="length"/> parameter defaults the length to be the same length as the
-        /// <paramref name="array"/> parameter with the <paramref name="index"/> subtracted difference. When the
-        /// <paramref name="clearOnException"/> parameter is set to true, any exceptions being thrown are caught
-        /// internally, and the <paramref name="array"/> parameter values are cleared to default values for the
-        /// entire array, not just the considerations of the <paramref name="index"/> and <paramref name="length"/>
-        /// parameters. After the arrays are cleared any caught exception is rethrown.
-        /// </remarks>
-        /// <typeparam name="T">The generic type parameter.</typeparam>
-        /// <param name="array">The array to validate bounds.</param>
-        /// <param name="intendedLength">
-        /// The value that would be used as 'length' in any additional calls against the <paramref name="array"/> parameter.
-        /// If <paramref name="length"/> was passed in with a value of zero, the intended length gets set to the difference
-        /// between the value of the <paramref name="index"/> parameter and the <paramref name="array"/> parameter length.
-        /// Otherwise it is set to the value of the <paramref name="length"/> parameter if it held a valid range.
-        /// </param>
-        /// <param name="index">The index location where the clear array command will begin.</param>
-        /// <param name="length">
-        /// The length of elements to clear for <paramref name="array"/> parameter, starting at the value of the
-        /// <paramref name="index"/> parameter location. If the <paramref name="length"/> is set to 0, the value
-        /// will be automatically calculated to the end of the array.
-        /// </param>
-        /// <param name="clearOnException">
-        /// For security aware applications, the <paramref name="clearOnException"/> parameter should be set to true.
-        /// The <paramref name="clearOnException"/> setting activates code when exceptions are thrown that clears the
-        /// values of all internal scoped array values including the <paramref name="array"/> parameter values. When
-        /// the values of all arrays are cleared, the exception is rethrown.
-        /// </param>
-        /// <param name="rethrowOnException">
-        /// After any internal exceptions are caught and array values cleared, the exception is rethrown unless
-        /// <paramref name="rethrowOnException"/> value is set to false.
-        /// </param>
-        /// <param name="clearAfterUse">
-        /// For security aware applications, the <paramref name="clearAfterUse"/> parameter should be set to true
-        /// when the data being operated on is no longer needed after the call to this method.
-        /// </param>
-        /// <returns>The <paramref name="array"/> parameter instance to allow for method chaining.</returns>
-        public static bool TryValidateArrayBounds<T>(this T[] array, out int intendedLength, int index = 0,
-            int length = 0, bool clearOnException = false, bool rethrowOnException = false, bool clearAfterUse = false)
-        {
-            // Assign defaults for intendedLength and isValidBounds.
-            intendedLength = 0;
-            
-            try
-            {
-                // If the array has not been initialized or contains no elements than exit the function.
-                if (array == null || !array.Any())
-                {
-                    if (index == 0 && length == 0) return true;
-                    throw new ArgumentOutOfRangeException(nameof(index), $"The '{nameof(index)}' and '{nameof(length)}'" +
-                        $" parameters cannot hold a value other than zero for a null or empty '{nameof(array)}'.");
-                }
-                // Index cannot be less than 0.
-                if (index < 0) throw new ArgumentOutOfRangeException(nameof(index),
-                    $"The '{nameof(index)}' parameter cannot hold a value less than zero.");
-                // Length cannot be less than 0.
-                if (length < 0) throw new ArgumentOutOfRangeException(nameof(length),
-                    $"The '{nameof(length)}' parameter cannot hold a value less than zero.");
-                // Capture array bounds.
-                var arrayLength = array.Length;
-                // Validate the index is within the bounds of the array.
-                if (index >= arrayLength) throw new IndexOutOfRangeException(
-                    $"The '{nameof(index)}' parameter holds a value out of scope of the '{nameof(array)}' parameter length.");
-                // Grab the valid intended length for the operations request for this array.
-                intendedLength = length;
-                if (intendedLength == 0)
-                    intendedLength = Math.Max(arrayLength - index, 1);
-                // Validate the intended index range is within the bounds of the array.
-                var intendedIndexRange = index + intendedLength;
-                if (intendedIndexRange > arrayLength) throw new IndexOutOfRangeException(
-                    $"The \"{nameof(length)}\" parameter holds a value that causes the \"{nameof(index)}\" parameter" +
-                    $" to be out of scope of the \"{nameof(array)}\" parameter length.");
-                // The array bounds are valid and return the array.
-                return true;
-            }
-            catch (Exception e)
-            {
-                // Clear array contents.
-                if (clearOnException && array != null && array.Any()) Array.Clear(array, 0, array.Length);
-                // TODO: may want to throw a new exception here in case the existing exception has critical or
-                // TODO: security sensitive data which has the potential of hitting logs.
-                if (rethrowOnException) throw; // TODO: Evaluate options.
-                return false;
-            }
-            finally
-            {
-                // Clear array contents after return value has been copied to calling code.
-                if (clearAfterUse && array != null && array.Any()) Array.Clear(array, 0, array.Length); 
-            }
-        }
-
         /// <summary>
         /// Converts array using the custom encoding value of <paramref name="encoding"/>.
         /// </summary>
-        /// <remarks>
-        /// If <paramref name="encoding"/> is null the default encoding <seealso cref="DefaultEncoding"/> is used
-        /// which is currently set to Encoding.UTF8.
-        /// </remarks>
-        /// <param name="array"></param>
+        /// <param name="array">The array to operate on.</param>
         /// <param name="encoding">The custom encoding to convert to.</param>
-        /// <param name="index">The index location where the clear array command will begin.</param>
-        /// <param name="length">
-        /// The length of elements to clear for <paramref name="array"/> parameter, starting at the value of the
-        /// <paramref name="index"/> parameter location. If the <paramref name="length"/> is set to 0, the value
-        /// will be automatically calculated to the end of the array.
-        /// </param>
-        /// <param name="clearOnException">
-        /// For security aware applications, the <paramref name="clearOnException"/> parameter should be set to true.
-        /// The <paramref name="clearOnException"/> setting activates code when exceptions are thrown that clears the
-        /// values of all internal scoped array values including the <paramref name="array"/> parameter values. When
-        /// the values of all arrays are cleared, the exception is rethrown.
-        /// </param>
+        /// <param name="skip">The start index for <paramref name="array"/> parameter.</param>
+        /// <param name="take"> The length of elements to take from the <paramref name="array"/> parameter.</param>
+        /// <param name="boundsMode">The <seealso cref="BoundsMode"/> rules of how to treat the <paramref name="array"/> data type.</param>
         /// <param name="clearAfterUse">
-        /// For security aware applications, the <paramref name="clearAfterUse"/> parameter should be set to true
-        /// when the data being operated on is no longer needed after the call to this method.
+        /// If <paramref name="clearAfterUse"/> parameter is set to true and the <paramref name="array"/> parameter is
+        /// not a readonly copy, than there will be an attempt made to clear the <paramref name="array"/> by zeroing
+        /// out or defaulting the values in the <paramref name="array"/>, even in the event an exception is thrown.
+        /// This helps with application security by giving developers the ability to clear plain text or critical data
+        /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <returns>An array of converted and encoded values.</returns>
-        public static byte[] ToByteArray<T>(this T[] array, Encoding encoding = null, int index = 0, int length = 0,
-            bool clearOnException = false, bool clearAfterUse = false)
+        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <returns>A byte array.</returns>
+        public static byte[] ToByteArray(this byte[] array, Encoding encoding = null, int? skip = null, int? take = null,
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
         {
-            const bool rethrowOnException = true;
-            byte[] byteResults = null;
-            char[] charResults = null;
             var exceptionThrown = false;
+            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
+            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
+            char[] charResults = null;
 
             try
             {
-                // If the array has valid bounds, clear the array using the index and intended length.
-                if (!array.TryValidateArrayBounds(out var intendedLength, index, length, clearOnException,
-                    rethrowOnException, clearAfterUse)) throw new ArgumentOutOfRangeException(
-                        nameof(array), "Unable to validate the array value successfully.");
+                // If the array has valid bounds than process list.
+                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
+                    throw boundsValidationResult.ToException(nameof(array));
 
-                // If the array has not been initialized or contains no elements than exit the function.
-                if (encoding == null) encoding = DefaultEncoding;
+                // Do basic validation check and return early if there is no values to process.
                 if (array == null) return null;
                 if (!array.Any()) return new byte[0];
 
                 // Convert the array values and return the results.
-                switch (array)
-                {
-                    case byte[] bytes:
-                    {
-                        byteResults = bytes;
-                        if (!byteResults.Any()) return new byte[0];
-                        charResults = encoding.GetChars(byteResults, index, intendedLength);
-                        if (!charResults.Any()) return new byte[0];
-                        byteResults = encoding.GetBytes(charResults);
-                        return byteResults.Any() ? byteResults : new byte[0];
-                    }
-                    case char[] chars:
-                    {
-                        charResults = chars;
-                        if (!charResults.Any()) return new byte[0];
-                        byteResults = encoding.GetBytes(charResults, index, intendedLength);
-                        return byteResults.Any() ? byteResults : new byte[0];
-                    }
-                    default:
-                        return null;
-                }
+                charResults = encoding.GetChars(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                if (!charResults.Any()) return new byte[0];
+                var byteResults = encoding.GetBytes(charResults);
+                return byteResults.Any() ? byteResults : new byte[0];
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 exceptionThrown = true;
-                if (!clearOnException) throw;
-
                 // Clear array contents.
-                if (array != null && array.Any()) Array.Clear(array, 0, array.Length);
-                if (charResults != null && charResults.Any()) Array.Clear(charResults, 0, charResults.Length);
-                if (byteResults != null && byteResults.Any()) Array.Clear(byteResults, 0, byteResults.Length);
-                // TODO: may want to throw a new exception here in case the existing exception has critical or
-                // TODO: security sensitive data which has the potential of hitting logs.
-                throw; // TODO: Evaluate options.
+                if (clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+                if (clearAfterUse.Value && charResults != null && !charResults.IsReadOnly && charResults.Length > 0)
+                    Array.Clear(charResults, 0, charResults.Length);
+                throw;
             }
             finally
             {
-                // Clear array contents after return value has been copied to calling code.
-                if (clearAfterUse && !(exceptionThrown && clearOnException))
-                {
-                    if (array != null && array.Any()) Array.Clear(array, 0, array.Length);
-                    if (charResults != null && charResults.Any()) Array.Clear(charResults, 0, charResults.Length);
-                    if (byteResults != null && byteResults.Any()) Array.Clear(byteResults, 0, byteResults.Length);
-                }
+                // Clear array contents.
+                if (!exceptionThrown && clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+                if (!exceptionThrown && clearAfterUse.Value && charResults != null && !charResults.IsReadOnly && charResults.Length > 0)
+                    Array.Clear(charResults, 0, charResults.Length);
             }
         }
 
         /// <summary>
         /// Converts array using the custom encoding value of <paramref name="encoding"/>.
         /// </summary>
-        /// <remarks>
-        /// If <paramref name="encoding"/> is null the default encoding <seealso cref="DefaultEncoding"/> is used
-        /// which is currently set to Encoding.UTF8.
-        /// </remarks>
-        /// <param name="array"></param>
+        /// <param name="array">The array to operate on.</param>
         /// <param name="encoding">The custom encoding to convert to.</param>
-        /// <param name="index">The index location where the clear array command will begin.</param>
-        /// <param name="length">
-        /// The length of elements to clear for <paramref name="array"/> parameter, starting at the value of the
-        /// <paramref name="index"/> parameter location. If the <paramref name="length"/> is set to 0, the value
-        /// will be automatically calculated to the end of the array.
-        /// </param>
-        /// <param name="clearOnException">
-        /// For security aware applications, the <paramref name="clearOnException"/> parameter should be set to true.
-        /// The <paramref name="clearOnException"/> setting activates code when exceptions are thrown that clears the
-        /// values of all internal scoped array values including the <paramref name="array"/> parameter values. When
-        /// the values of all arrays are cleared, the exception is rethrown.
-        /// </param>
+        /// <param name="skip">The start index for <paramref name="array"/> parameter.</param>
+        /// <param name="take"> The length of elements to take from the <paramref name="array"/> parameter.</param>
+        /// <param name="boundsMode">The <seealso cref="BoundsMode"/> rules of how to treat the <paramref name="array"/> data type.</param>
         /// <param name="clearAfterUse">
-        /// For security aware applications, the <paramref name="clearAfterUse"/> parameter should be set to true
-        /// when the data being operated on is no longer needed after the call to this method.
+        /// If <paramref name="clearAfterUse"/> parameter is set to true and the <paramref name="array"/> parameter is
+        /// not a readonly copy, than there will be an attempt made to clear the <paramref name="array"/> by zeroing
+        /// out or defaulting the values in the <paramref name="array"/>, even in the event an exception is thrown.
+        /// This helps with application security by giving developers the ability to clear plain text or critical data
+        /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <returns>An array of converted and encoded values.</returns>
-        public static char[] ToCharacterArray<T>(this T[] array, Encoding encoding = null, int index = 0, int length = 0,
-            bool clearOnException = false, bool clearAfterUse = false)
+        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <returns>A byte array.</returns>
+        public static byte[] ToByteArray(this char[] array, Encoding encoding = null, int? skip = null, int? take = null,
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
         {
-            const bool rethrowOnException = true;
-            char[] charResults = null;
-            byte[] byteResults = null;
             var exceptionThrown = false;
+            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
+            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
 
             try
             {
-                // If the array has valid bounds, clear the array using the index and intended length.
-                if (!array.TryValidateArrayBounds(out var intendedLength, index, length, clearOnException,
-                    rethrowOnException, clearAfterUse)) throw new ArgumentOutOfRangeException(
-                    nameof(array), "Unable to validate the array value successfully.");
+                // If the array has valid bounds than process list.
+                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
+                    throw boundsValidationResult.ToException(nameof(array));
+
+                // Do basic validation check and return early if there is no values to process.
+                if (array == null) return null;
+                if (!array.Any()) return new byte[0];
+
+                // Convert the array values and return the results.
+                var byteResults = encoding.GetBytes(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                return byteResults.Any() ? byteResults : new byte[0];
+            }
+            catch (Exception)
+            {
+                exceptionThrown = true;
+                // Clear array contents.
+                if (clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+                throw;
+            }
+            finally
+            {
+                // Clear array contents.
+                if (!exceptionThrown && clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+            }
+        }
+
+        /// <summary>
+        /// Converts array using the custom encoding value of <paramref name="encoding"/>.
+        /// </summary>
+        /// <param name="array">The array to operate on.</param>
+        /// <param name="encoding">The custom encoding to convert to.</param>
+        /// <param name="skip">The start index for <paramref name="array"/> parameter.</param>
+        /// <param name="take"> The length of elements to take from the <paramref name="array"/> parameter.</param>
+        /// <param name="boundsMode">The <seealso cref="BoundsMode"/> rules of how to treat the <paramref name="array"/> data type.</param>
+        /// <param name="clearAfterUse">
+        /// If <paramref name="clearAfterUse"/> parameter is set to true and the <paramref name="array"/> parameter is
+        /// not a readonly copy, than there will be an attempt made to clear the <paramref name="array"/> by zeroing
+        /// out or defaulting the values in the <paramref name="array"/>, even in the event an exception is thrown.
+        /// This helps with application security by giving developers the ability to clear plain text or critical data
+        /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
+        /// </param>
+        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <returns>A char array.</returns>
+        public static char[] ToCharacterArray(this byte[] array, Encoding encoding = null, int? skip = null, int? take = null,
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+        {
+            var exceptionThrown = false;
+            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
+            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
+
+            try
+            {
+                // If the array has valid bounds than process list.
+                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
+                    throw boundsValidationResult.ToException(nameof(array));
 
                 // If the array has not been initialized or contains no elements than exit the function.
-                if (encoding == null) encoding = DefaultEncoding;
+                if (encoding == null)
+                    encoding = NinjaCoreSettings.DefaultEncoding;
+
+                // Do basic validation check and return early if there is no values to process.
                 if (array == null) return null;
                 if (!array.Any()) return new char[0];
 
-                // Convert the array values and return the results.
-                switch (array)
-                {
-                    case byte[] bytes:
-                    {
-                        byteResults = bytes;
-                        if (!byteResults.Any()) return new char[0];
-                        charResults = encoding.GetChars(byteResults, index, intendedLength);
-                        return charResults.Any() ? charResults : new char[0];
-                    }
-                    case char[] chars:
-                    {
-                        charResults = chars;
-                        if (!charResults.Any()) return new char[0];
-                        byteResults = encoding.GetBytes(charResults, index, intendedLength);
-                        if (!byteResults.Any()) return new char[0];
-                        charResults = encoding.GetChars(byteResults);
-                        return charResults.Any() ? charResults : new char[0];
-                    }
-                    default:
-                        return null;
-                }
+                var charResults = encoding.GetChars(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                return charResults.Any() ? charResults : new char[0];
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 exceptionThrown = true;
-                if (!clearOnException) throw;
-
                 // Clear array contents.
-                if (array != null && array.Any()) Array.Clear(array, 0, array.Length);
-                if (byteResults != null && byteResults.Any()) Array.Clear(byteResults, 0, byteResults.Length);
-                if (charResults != null && charResults.Any()) Array.Clear(charResults, 0, charResults.Length);
-                // TODO: may want to throw a new exception here in case the existing exception has critical or
-                // TODO: security sensitive data which has the potential of hitting logs.
-                throw; // TODO: Evaluate options.
+                if (clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+                throw;
+            }
+            finally
+            {
+                // Clear array contents.
+                if (!exceptionThrown && clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+            }
+        }
+
+        /// <summary>
+        /// Converts array using the custom encoding value of <paramref name="encoding"/>.
+        /// </summary>
+        /// <param name="array">The array to operate on.</param>
+        /// <param name="encoding">The custom encoding to convert to.</param>
+        /// <param name="skip">The start index for <paramref name="array"/> parameter.</param>
+        /// <param name="take"> The length of elements to take from the <paramref name="array"/> parameter.</param>
+        /// <param name="boundsMode">The <seealso cref="BoundsMode"/> rules of how to treat the <paramref name="array"/> data type.</param>
+        /// <param name="clearAfterUse">
+        /// If <paramref name="clearAfterUse"/> parameter is set to true and the <paramref name="array"/> parameter is
+        /// not a readonly copy, than there will be an attempt made to clear the <paramref name="array"/> by zeroing
+        /// out or defaulting the values in the <paramref name="array"/>, even in the event an exception is thrown.
+        /// This helps with application security by giving developers the ability to clear plain text or critical data
+        /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
+        /// </param>
+        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <returns>A char array.</returns>
+        public static char[] ToCharacterArray(this char[] array, Encoding encoding = null, int? skip = null, int? take = null,
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+        {
+            var exceptionThrown = false;
+            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
+            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
+            byte[] byteResults = null;
+
+            try
+            {
+                // If the array has valid bounds than process list.
+                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
+                    throw boundsValidationResult.ToException(nameof(array));
+
+                // If the array has not been initialized or contains no elements than exit the function.
+                if (encoding == null)
+                    encoding = NinjaCoreSettings.DefaultEncoding;
+
+                // Do basic validation check and return early if there is no values to process.
+                if (array == null) return null;
+                if (!array.Any()) return new char[0];
+
+                
+                byteResults = encoding.GetBytes(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                if (!byteResults.Any()) return new char[0];
+                var charResults = encoding.GetChars(byteResults);
+                return charResults.Any() ? charResults : new char[0];
+            }
+            catch (Exception)
+            {
+                exceptionThrown = true;
+                // Clear array contents.
+                if (clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+                if (clearAfterUse.Value && byteResults != null && !byteResults.IsReadOnly && byteResults.Length > 0)
+                    Array.Clear(byteResults, 0, byteResults.Length);
+                throw;
+            }
+            finally
+            {
+                // Clear array contents.
+                if (!exceptionThrown && clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+                if (!exceptionThrown && clearAfterUse.Value && byteResults != null && !byteResults.IsReadOnly && byteResults.Length > 0)
+                    Array.Clear(byteResults, 0, byteResults.Length);
+            }
+        }
+
+        /// <summary>
+        /// Clears specified array values by setting all of the array values to the default value of
+        /// <typeparamref name="T"/> parameter for use with the current <paramref name="skip"/> and
+        /// <paramref name="take"/> values.
+        /// </summary>
+        /// <typeparam name="T">The generic type parameter.</typeparam>
+        /// <param name="array">The array to operate on.</param>
+        /// <param name="skip">The start index for <paramref name="array"/> parameter.</param>
+        /// <param name="take"> The length of elements to take from the <paramref name="array"/> parameter.</param>
+        /// <param name="boundsMode">The <seealso cref="BoundsMode"/> rules of how to treat the <paramref name="array"/> data type.</param>
+        /// <param name="clearAfterUse">
+        /// If <paramref name="clearAfterUse"/> parameter is set to true and the <paramref name="array"/> parameter is
+        /// not a readonly copy, than there will be an attempt made to clear the <paramref name="array"/> by zeroing
+        /// out or defaulting the values in the <paramref name="array"/>, even in the event an exception is thrown.
+        /// This helps with application security by giving developers the ability to clear plain text or critical data
+        /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
+        /// </param>
+        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <returns>True if the clear succeeded, false if not.</returns>
+        public static bool TryClear<T>(this T[] array, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
+            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+        {
+            var exceptionThrown = false;
+            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
+            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+
+            try
+            {
+                // If the array has valid bounds than process list.
+                var boundsValidationResult = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                if (!boundsValidationResult.IsValid || boundsValidationResult.InvalidBounds.Count > 0)
+                    throw boundsValidationResult.ToException(nameof(array));
+
+                // Do basic validation check and return early if there is no values to process.
+                if (array == null || !array.Any()) return true;
+
+                // Clear the array based on the user array bounds and return the array.
+                switch (boundsMode)
+                {
+                    case BoundsMode.Array:
+                        if (!array.IsReadOnly)
+                        {
+                            Array.Clear(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                            return true;
+                        }
+                        break;
+                    case BoundsMode.PassThrough:
+                        if (!array.IsReadOnly)
+                        {
+                            Array.Clear(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (!array.IsReadOnly && boundsValidationResult.IntendedSkip < array.Length)
+                        {
+                            if (boundsValidationResult.IntendedSkip + boundsValidationResult.IntendedTake <= array.Length)
+                                Array.Clear(array, boundsValidationResult.IntendedSkip, boundsValidationResult.IntendedTake);
+                            else
+                                Array.Clear(array, boundsValidationResult.IntendedSkip, array.Length - Math.Max(boundsValidationResult.IntendedSkip, 0));
+
+                            return true;
+                        }
+                        break;
+                }
+
+                return false;
+            }
+            catch (Exception)
+            {
+                exceptionThrown = true;
+                // Clear array contents.
+                if (clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+                throw;
+            }
+            finally
+            {
+                // Clear array contents.
+                if (!exceptionThrown && clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
+            }
+        }
+
+        /// <summary>
+        /// Validates the specified array is valid for use with the <paramref name="skip"/> and
+        /// <paramref name="take"/> parameters if provided, and provides back the <seealso cref="BoundsValidationResult"/>
+        /// summary of validity, error messages, and intended measurements. 
+        /// </summary>
+        /// <param name="array">The array to operate on.</param>
+        /// <param name="skip">The start index for <paramref name="array"/> parameter.</param>
+        /// <param name="take"> The length of elements to take from the <paramref name="array"/> parameter.</param>
+        /// <param name="boundsMode">The <seealso cref="BoundsMode"/> rules of how to treat the <paramref name="array"/> data type.</param>
+        /// <param name="clearAfterUse">
+        /// If <paramref name="clearAfterUse"/> parameter is set to true and the <paramref name="array"/> parameter is
+        /// not a readonly copy, than there will be an attempt made to clear the <paramref name="array"/> by zeroing
+        /// out or defaulting the values in the <paramref name="array"/>, even in the event an exception is thrown.
+        /// This helps with application security by giving developers the ability to clear plain text or critical data
+        /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
+        /// </param>
+        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <returns>The <seealso cref="BoundsValidationResult"/> parameter.</returns>
+        public static BoundsValidationResult TryValidateBounds<T>(this T[] array, int? skip = null, int? take = null,
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+        {
+            var exceptionThrown = false;
+            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
+            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+
+            try
+            {
+                // Capture array bounds.
+                var arrayLength = array?.Length ?? 0;
+                var invalidBounds = new List<InvalidBounds>();
+                var intendedSkip = skip;
+                var intendedTake = take;
+
+                // Allowing less than zero if something different subscribes to this interface.
+                if (arrayLength <= 0)
+                {
+                    // If the array has not been initialized or contains no elements than assume this is a valid response.
+                    switch (boundsMode)
+                    {
+                        case BoundsMode.Array:
+                            // If skip only has a default value.
+                            if (!intendedSkip.HasValue) intendedSkip = 0;
+                            // Negative skip value is not allowed in array mode.
+                            else if (intendedSkip < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
+                            // Skip value is too large for array mode with length of zero.
+                            else if (intendedSkip > 0) invalidBounds.Add(new InvalidBounds(nameof(skip),
+                                $"The '{nameof(skip)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+
+                            // If take only has a default value.
+                            if (!intendedTake.HasValue) intendedTake = 0;
+                            // Negative take value is not allowed in array mode.
+                            else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            // Skip value is too large for array mode with length of zero.
+                            else if (intendedTake.Value > 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                $"The '{nameof(take)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+                            break;
+                        case BoundsMode.Ninja:
+                        case BoundsMode.List:
+                            // If skip only has a default value.
+                            if (!intendedSkip.HasValue) intendedSkip = 0;
+                            // Negative skip values are not allowed in list mode.
+                            else if (intendedSkip < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
+                            // Skip can be greater than or equal to the list length in list mode.
+
+                            // If take only has a default value.
+                            if (!intendedTake.HasValue) intendedTake = 0;
+                            // Negative take value is not allowed in list mode.
+                            else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            // Take can be greater than or equal to the list length in list mode.
+                            break;
+                        // case BoundsMode.PassThrough:
+                        default:
+                            intendedSkip ??= 0;
+                            intendedTake ??= 0;
+                            break;
+                    }
+                }
+                else
+                {
+                    // If the list has not been initialized or contains no elements than assume this is a valid response.
+                    switch (boundsMode)
+                    {
+                        case BoundsMode.Array:
+                            // If skip only has a default value.
+                            if (!intendedSkip.HasValue || intendedSkip.Value == 0)
+                            {
+                                // Default skip value.
+                                intendedSkip = 0;
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                // Skip and take value is too large for array mode.
+                                else if (intendedTake.Value > arrayLength) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+                                // Negative take value is not allowed in array mode.
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            // Skip value is too large for array mode if skip is the index.
+                            else if (intendedSkip.Value > 0 && intendedSkip.Value <= arrayLength)
+                            {
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                // Skip and take value is too large for array mode.
+                                else if (intendedSkip.Value + intendedTake.Value > arrayLength) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+                                // Negative take value is not allowed in array mode.
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            // Skip value is too large for array mode if skip is the index.
+                            else if (intendedSkip.Value > arrayLength)
+                            {
+                                // Skip value is too large for array mode.
+                                invalidBounds.Add(new InvalidBounds(nameof(skip),
+                                    $"The '{nameof(skip)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                // Skip and take value is too large for array mode.
+                                else if (intendedTake.Value > arrayLength) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+                                // Negative take value is not allowed in array mode.
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            else if (intendedSkip.Value < 0)
+                            {
+                                // Negative skip values are not allowed in array mode.
+                                invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                // Skip and take value is too large for array mode.
+                                else if (intendedTake.Value > arrayLength) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+                                // Negative take value is not allowed in array mode.
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            break;
+                        case BoundsMode.Ninja:
+                        case BoundsMode.List:
+                            // If skip only has a default value.
+                            if (!intendedSkip.HasValue || intendedSkip.Value == 0)
+                            {
+                                // Default skip value.
+                                intendedSkip = 0;
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            // Skip value is too large for array mode if skip is the index.
+                            else if (intendedSkip.Value > 0 && intendedSkip.Value <= arrayLength)
+                            {
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                // Negative take value is not allowed in array mode.
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            // Skip value is too large for array mode if skip is the index.
+                            else if (intendedSkip.Value > arrayLength)
+                            {
+                                // Skip value is too large for array mode.
+                                invalidBounds.Add(new InvalidBounds(nameof(skip),
+                                    $"The '{nameof(skip)}' parameter holds a value out of bounds of the '{nameof(array)}' parameter."));
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                // Negative take value is not allowed in array mode.
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            else if (intendedSkip.Value < 0)
+                            {
+                                // Negative skip values are not allowed in array mode.
+                                invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(skip)}' parameter cannot hold a value less than zero."));
+                                // If take only has a default value.
+                                if (!intendedTake.HasValue) intendedTake = arrayLength;
+                                // Nothing to take.
+                                else if (intendedTake.Value == 0) intendedTake = 0;
+                                // Negative take value is not allowed in array mode.
+                                else if (intendedTake.Value < 0) invalidBounds.Add(new InvalidBounds(nameof(take),
+                                    $"The '{nameof(take)}' parameter cannot hold a value less than zero."));
+                            }
+                            break;
+                        // case BoundsMode.PassThrough:
+                        default:
+                            intendedSkip ??= 0;
+                            intendedTake ??= 0;
+                            break;
+                    }
+                }
+
+                // Make sure take has a value.
+                intendedTake ??= 0;
+
+                // The list bounds are valid and return the list.
+                return new BoundsValidationResult(intendedSkip.Value, intendedTake.Value, invalidBounds);
+            }
+            catch (Exception)
+            {
+                exceptionThrown = true;
+                // Clear array contents.
+                if (!clearAfterUse.Value || array == null || array.IsReadOnly || array.Length <= 0) throw;
+                Array.Clear(array, 0, array.Length);
+                throw;
             }
             finally
             {
                 // Clear array contents after return value has been copied to calling code.
-                if (clearAfterUse && !(exceptionThrown && clearOnException))
-                {
-                    if (array != null && array.Any()) Array.Clear(array, 0, array.Length);
-                    if (byteResults != null && byteResults.Any()) Array.Clear(byteResults, 0, byteResults.Length);
-                    if (charResults != null && charResults.Any()) Array.Clear(charResults, 0, charResults.Length);
-                }
+                if (!exceptionThrown && clearAfterUse.Value && array != null && !array.IsReadOnly && array.Length > 0)
+                    Array.Clear(array, 0, array.Length);
             }
         }
     }
