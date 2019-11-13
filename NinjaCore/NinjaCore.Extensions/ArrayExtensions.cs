@@ -27,21 +27,22 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>A byte array.</returns>
         public static byte[] ToByteArray(this byte[] array, Encoding encoding = null, int? skip = null, int? take = null,
-            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
-            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
+            var internalSettings = settings.GetInternalSettings(encoding, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
+            encoding = internalSettings.Encoding;
             char[] charResults = null;
 
             try
             {
                 // If the array has valid bounds than process list.
-                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -90,20 +91,21 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>A byte array.</returns>
         public static byte[] ToByteArray(this char[] array, Encoding encoding = null, int? skip = null, int? take = null,
-            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
-            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
+            var internalSettings  = settings.GetInternalSettings(encoding, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
+            encoding = internalSettings.Encoding;
 
             try
             {
                 // If the array has valid bounds than process list.
-                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -146,26 +148,23 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">NinjaCore settings instance.</param>
         /// <returns>A char array.</returns>
         public static char[] ToCharacterArray(this byte[] array, Encoding encoding = null, int? skip = null, int? take = null,
-            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
-            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
+            var internalSettings = settings.GetInternalSettings(encoding, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
+            encoding = internalSettings.Encoding;
 
             try
             {
                 // If the array has valid bounds than process list.
-                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
-
-                // If the array has not been initialized or contains no elements than exit the function.
-                if (encoding == null)
-                    encoding = NinjaCoreSettings.DefaultEncoding;
 
                 // Do basic validation check and return early if there is no values to process.
                 if (array == null) return null;
@@ -205,21 +204,22 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>A char array.</returns>
         public static char[] ToCharacterArray(this char[] array, Encoding encoding = null, int? skip = null, int? take = null,
-            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
-            encoding = InternalNinjaCoreSettings.GetEncoding(ninjaCoreSettings, encoding);
+            var internalSettings = settings.GetInternalSettings(encoding, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
+            encoding = internalSettings.Encoding;
             byte[] byteResults = null;
 
             try
             {
                 // If the array has valid bounds than process list.
-                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -269,19 +269,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>True if the clear succeeded, false if not.</returns>
         public static bool TryClear<T>(this T[] array, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the array has valid bounds than process list.
-                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = array.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -350,15 +351,16 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>The <seealso cref="Bounds"/> parameter.</returns>
         public static Bounds TryValidateBounds<T>(this T[] array, int? skip = null, int? take = null,
-            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
-
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
+            
             try
             {
                 // Capture array bounds.

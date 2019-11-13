@@ -11,8 +11,6 @@ namespace NinjaCore.Extensions
     /// </summary>
     public static class ListExtensions
     {
-        // bool // char // double // float // int // long // short // unint // ulong // ushort
-        
         /// <summary>
         /// Converts an IList to a encoded list of bytes with the respect to the source to target encodings and can be
         /// use with the <paramref name="skip"/> and <paramref name="take"/> parameters if provided.
@@ -28,19 +26,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<bool> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
-           var exceptionThrown = false;
-           boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-           clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var exceptionThrown = false;
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -84,19 +83,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<char> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -140,19 +140,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<double> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -196,19 +197,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<float> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -252,19 +254,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<int> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -308,19 +311,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<long> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -364,19 +368,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<short> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -420,19 +425,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<uint> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -476,19 +482,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns><returns>A byte array.</returns></returns>
         public static byte[] ToByteArray(this IList<ulong> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -532,19 +539,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>A byte array.</returns>
         public static byte[] ToByteArray(this IList<ushort> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -593,19 +601,20 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>True if the clear succeeded, false if not.</returns>
         public static bool TryClear<T>(this IList<T> list, int? skip = null, int? take = null, BoundsMode? boundsMode = null,
-            bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {
                 // If the list has valid bounds than process list.
-                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, ninjaCoreSettings);
+                var bounds = list.TryValidateBounds(skip, take, boundsMode, clearAfterUse: false, settings);
                 if (!bounds.IsValid || bounds.InvalidBounds.Count > 0)
                     throw bounds.ToException();
 
@@ -679,14 +688,15 @@ namespace NinjaCore.Extensions
         /// This helps with application security by giving developers the ability to clear plain text or critical data
         /// along route of a fluent syntax style chain of expression blocks; aiding in code readability and security.
         /// </param>
-        /// <param name="ninjaCoreSettings">The ninja core settings object.</param>
+        /// <param name="settings">The ninja core settings object.</param>
         /// <returns>The <seealso cref="Bounds"/> parameter.</returns>
         public static Bounds TryValidateBounds<T>(this IList<T> list, int? skip = null, int? take = null,
-            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings ninjaCoreSettings = null)
+            BoundsMode? boundsMode = null, bool? clearAfterUse = null, NinjaCoreSettings settings = null)
         {
             var exceptionThrown = false;
-            boundsMode = InternalNinjaCoreSettings.GetBoundsMode(ninjaCoreSettings, boundsMode);
-            clearAfterUse = InternalNinjaCoreSettings.GetClearAfterUse(ninjaCoreSettings, clearAfterUse);
+            var internalSettings = settings.GetInternalSettings(null, boundsMode, clearAfterUse);
+            boundsMode = internalSettings.BoundsMode;
+            clearAfterUse = internalSettings.ClearAfterUse;
 
             try
             {

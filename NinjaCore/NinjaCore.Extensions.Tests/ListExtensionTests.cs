@@ -20,52 +20,52 @@ namespace NinjaCore.Extensions.Tests
         [Trait("Category", "Mocked")]
         public void MockedTestForTryValidateAllBoundModesWithDefaultParametersShouldPass()
         {
-            var ninjaCoreSettings = new NinjaCoreSettings();
+            var settings = new NinjaCoreSettings();
             // Iterate through all BoundsMode values.
             foreach (var boundsMode in BoundsModes)
             {
                 // Default Ninja Bounds Settings.
-                NinjaCoreSettings.DefaultBoundsMode = boundsMode;
+                settings.BoundsMode = boundsMode;
                 // Test Multi Value List Scenario With Default Parameters .
                 var value = new List<int> { 0, int.MaxValue, int.MinValue, int.MaxValue, 0 };
-                var bounds = value.TryValidateBounds(ninjaCoreSettings: ninjaCoreSettings);
+                var bounds = value.TryValidateBounds(settings: settings);
                 bounds.Should().BeOfType<Bounds>();
                 bounds.Should().NotBeNull();
                 bounds.IsValid.Should().BeTrue();
                 bounds.IntendedSkip.Should().Be(0);
                 bounds.IntendedTake.Should().Be(value.Count);
-                var bytes = value.ToByteArray(ninjaCoreSettings: ninjaCoreSettings);
+                var bytes = value.ToByteArray(settings: settings);
                 var expectedBytes = bytes.ToCharacterArray(Encoding.Unicode).ToByteArray(Encoding.Unicode);
                 bytes.Should().BeOfType<byte[]>();
                 bytes.Should().NotBeNullOrEmpty();
                 bytes.Should().BeEquivalentTo(expectedBytes);
                 // Test Null List Scenario With Default Parameters.
-                bounds = ((List<int>) null).TryValidateBounds(ninjaCoreSettings: ninjaCoreSettings);
+                bounds = ((List<int>) null).TryValidateBounds(settings: settings);
                 bounds.IsValid.Should().BeTrue();
                 bounds.IntendedSkip.Should().Be(0);
                 bounds.IntendedTake.Should().Be(0);
-                bytes = ((List<int>) null).ToByteArray(ninjaCoreSettings: ninjaCoreSettings);
+                bytes = ((List<int>) null).ToByteArray(settings: settings);
                 expectedBytes = bytes.ToCharacterArray(Encoding.Unicode).ToByteArray(Encoding.Unicode);
                 bytes.Should().BeNull();
                 bytes.Should().BeEquivalentTo(expectedBytes);
                 // Test Empty List Scenario With Default Parameters.
                 value = new List<int>();
-                bounds = value.TryValidateBounds(ninjaCoreSettings: ninjaCoreSettings);
+                bounds = value.TryValidateBounds(settings: settings);
                 bounds.IsValid.Should().BeTrue();
                 bounds.IntendedSkip.Should().Be(0);
                 bounds.IntendedTake.Should().Be(0);
-                bytes = value.ToByteArray(ninjaCoreSettings: ninjaCoreSettings);
+                bytes = value.ToByteArray(settings: settings);
                 expectedBytes = bytes.ToCharacterArray(Encoding.Unicode).ToByteArray(Encoding.Unicode);
                 bytes.Should().BeOfType<byte[]>();
                 bytes.Should().BeNullOrEmpty();
                 bytes.Should().BeEquivalentTo(expectedBytes);
                 // Test Single Value List Scenario With Default Parameters.
                 value = new List<int> { int.MinValue };
-                bounds = value.TryValidateBounds(ninjaCoreSettings: ninjaCoreSettings);
+                bounds = value.TryValidateBounds(settings: settings);
                 bounds.IsValid.Should().BeTrue();
                 bounds.IntendedSkip.Should().Be(0);
                 bounds.IntendedTake.Should().Be(1);
-                bytes = value.ToByteArray(ninjaCoreSettings: ninjaCoreSettings);
+                bytes = value.ToByteArray(settings: settings);
                 expectedBytes = bytes.ToCharacterArray(Encoding.Unicode).ToByteArray(Encoding.Unicode);
                 bytes.Should().BeOfType<byte[]>();
                 bytes.Should().NotBeNullOrEmpty();
@@ -372,7 +372,7 @@ namespace NinjaCore.Extensions.Tests
         [Trait("Category", "Mocked")]
         public void MockedTestForTryClearAllBoundModesShouldPass()
         {
-            var ninjaCoreSettings = new NinjaCoreSettings();
+            var settings = new NinjaCoreSettings();
             // Iterate through all BoundsMode values.
             foreach (var boundsMode in BoundsModes)
             {
@@ -391,17 +391,17 @@ namespace NinjaCore.Extensions.Tests
                 fullClear.Should().BeOfType<List<byte>>();
                 fullClear.Should().NotBeNullOrEmpty();
 
-                var isValid = value.TryClear(skip: 6, take: 2, ninjaCoreSettings: ninjaCoreSettings);
+                var isValid = value.TryClear(skip: 6, take: 2, settings: settings);
                 value.Should().BeEquivalentTo(partialClear);
                 isValid.Should().BeTrue();
 
                 value = Encoding.UTF8.GetBytes("0123456789").ToList();
-                isValid = value.TryClear(skip: 0, take: 10, ninjaCoreSettings: ninjaCoreSettings);
+                isValid = value.TryClear(skip: 0, take: 10, settings: settings);
                 value.Should().BeEquivalentTo(fullClear);
                 isValid.Should().BeTrue();
 
                 value = Encoding.UTF8.GetBytes("0123456789").ToList();
-                isValid = value.TryClear(skip: 6, take: 2, clearAfterUse: true, ninjaCoreSettings: ninjaCoreSettings);
+                isValid = value.TryClear(skip: 6, take: 2, clearAfterUse: true, settings: settings);
                 value.Should().BeEquivalentTo(fullClear);
                 isValid.Should().BeTrue();
 
@@ -409,11 +409,11 @@ namespace NinjaCore.Extensions.Tests
                     continue;
 
                 value = Encoding.UTF8.GetBytes("0123456789").ToList();
-                isValid = value.TryClear(skip: 10, take: 10, ninjaCoreSettings: ninjaCoreSettings);
+                isValid = value.TryClear(skip: 10, take: 10, settings: settings);
                 value.Should().NotBeEquivalentTo(fullClear);
                 isValid.Should().BeTrue();
 
-                isValid = value.TryClear(skip: 7, take: 10, clearAfterUse: true, ninjaCoreSettings: ninjaCoreSettings);
+                isValid = value.TryClear(skip: 7, take: 10, clearAfterUse: true, settings: settings);
                 value.Should().BeEquivalentTo(fullClear);
                 isValid.Should().BeTrue();
             }
